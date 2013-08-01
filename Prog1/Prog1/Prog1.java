@@ -25,6 +25,7 @@ public class Prog1
 		}
 
 		String fileName = (args.length == 2) ? args[1] : args[0];
+		boolean debug = (args.length == 2) ? true : false;
 		File inputFile = new File(fileName);
 
 		// Check if the user's input file exists before using it
@@ -43,7 +44,7 @@ public class Prog1
 		catch (FileNotFoundException e)
 		{
 		} // We check this ahead of time, so it shouldn't be possible
-
+		
 		// If pointList returned null, we have nothing to
 		// do, and an error message should have already
 		// been printed
@@ -56,8 +57,10 @@ public class Prog1
 		// Use the list of points that we created from the user's
 		// input file to calculate the convex hull for the set of points.
 
+		long startTime = System.nanoTime();
 		// Add call to convex hull function here
-		calculateConvexHull(pointList);
+		calculateConvexHull(pointList, debug);
+		System.out.println(System.nanoTime() - startTime);
 	}
 
 	// Function: validateArguments
@@ -139,52 +142,50 @@ public class Prog1
 		return pointList;
 	}
 
-	public static void calculateConvexHull(LinkedList<Point2D.Float> pointList)
+	public static void calculateConvexHull(LinkedList<Point2D.Float> pointList,
+			boolean debug)
 	{
 		LinkedList<Line2D.Float> hullEdges = new LinkedList<Line2D.Float>();
 		int relativePositionIndicator = 2;
-		for (int startPointIndex = 0; startPointIndex < pointList.size(); startPointIndex++)
+		for (int startIndex = 0; startIndex < pointList.size(); startIndex++)
 		{
-			for (int endPointIndex = startPointIndex + 1; endPointIndex < pointList
-					.size(); endPointIndex++)
+			for (int endIndex = startIndex + 1; endIndex < pointList.size(); endIndex++)
 			{
-				Line2D.Float inspectionLine = new Line2D.Float(
-						pointList.get(startPointIndex),
-						pointList.get(endPointIndex));
-				boolean isHullEdge = true;
+				Line2D.Float inspectionLine = new Line2D.Float(pointList.get(startIndex),
+						pointList.get(endIndex));
+				boolean isHullEdge = true; // Assume isHullEdge by default
+				// Initialize to 2 because relativeCCW can't return it
 				relativePositionIndicator = 2;
-				for (int inspectionPointIndex = 0; inspectionPointIndex < pointList
-						.size(); inspectionPointIndex++)
+				for (int inspectionIndex = 0; inspectionIndex < pointList.size(); inspectionIndex++)
 				{
-					if (inspectionPointIndex == endPointIndex
-							|| inspectionPointIndex == startPointIndex)
+					if (inspectionIndex == endIndex || inspectionIndex == startIndex)
 					{
 						continue;
 					}
 
-					if (relativePositionIndicator == 2)
+					int pointRelativePosition = inspectionLine.relativeCCW(pointList
+							.get(inspectionIndex));
+					// If we haven't initialized it, we won't do a comparison
+					if (relativePositionIndicator == 2 && pointRelativePosition != 0)
 					{
-						relativePositionIndicator = inspectionLine
-								.relativeCCW(pointList
-										.get(inspectionPointIndex));
+						relativePositionIndicator = pointRelativePosition;
 					}
-					else
+					else if (pointRelativePosition != relativePositionIndicator && pointRelativePosition != 0)
 					{
-						if (inspectionLine.relativeCCW(pointList
-								.get(inspectionPointIndex)) != relativePositionIndicator)
-						{
-							isHullEdge = false;
-							break;
-						}
+						isHullEdge = false;
+						break;
 					}
 				}
 
 				if (isHullEdge)
 				{
 					hullEdges.add(inspectionLine);
-					System.out.println("Add the line to convex hull:");
-					System.out.println("Start Point: " + inspectionLine.getP1());
-					System.out.println("End Point: " + inspectionLine.getP2());
+					if (debug)
+					{
+						System.out.println("Add the line to convex hull:");
+						System.out.println("Start Point: " + inspectionLine.getP1());
+						System.out.println("End Point: " + inspectionLine.getP2());
+					}
 				}
 			}
 		}
