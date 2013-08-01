@@ -44,7 +44,7 @@ public class Prog1
 		catch (FileNotFoundException e)
 		{
 		} // We check this ahead of time, so it shouldn't be possible
-		
+
 		// If pointList returned null, we have nothing to
 		// do, and an error message should have already
 		// been printed
@@ -156,21 +156,27 @@ public class Prog1
 				boolean isHullEdge = true; // Assume isHullEdge by default
 				// Initialize to 2 because relativeCCW can't return it
 				relativePositionIndicator = 2;
-				for (int inspectionIndex = 0; inspectionIndex < pointList.size(); inspectionIndex++)
+				for (Point2D.Float inspectionPoint : pointList)
 				{
-					if (inspectionIndex == endIndex || inspectionIndex == startIndex)
+					if (inspectionLine.ptSegDist(inspectionPoint) > 0
+							&& inspectionLine.ptLineDist(inspectionPoint) == 0)
+					{
+						isHullEdge = false;
+						break;
+					}
+
+					int pointRelativePosition = inspectionLine
+							.relativeCCW(inspectionPoint);
+					if (pointRelativePosition == 0)
 					{
 						continue;
 					}
-
-					int pointRelativePosition = inspectionLine.relativeCCW(pointList
-							.get(inspectionIndex));
 					// If we haven't initialized it, we won't do a comparison
-					if (relativePositionIndicator == 2 && pointRelativePosition != 0)
+					else if (relativePositionIndicator == 2)
 					{
 						relativePositionIndicator = pointRelativePosition;
 					}
-					else if (pointRelativePosition != relativePositionIndicator && pointRelativePosition != 0)
+					else if (pointRelativePosition != relativePositionIndicator)
 					{
 						isHullEdge = false;
 						break;
