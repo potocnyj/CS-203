@@ -1,5 +1,6 @@
-// Program: Prog1
+// Programming Assignment 1: Prog1
 // Author: John Potocny
+// LoginID: poto4766
 // Class: CS-203
 // Professor: Jim Huggins
 package Prog1;
@@ -59,8 +60,13 @@ public class Prog1
 
 		long startTime = System.nanoTime();
 		// Add call to convex hull function here
-		calculateConvexHull(pointList, debug);
-		System.out.println(System.nanoTime() - startTime);
+		LinkedList<Line2D.Float> hullEdges = calculateConvexHull(pointList, debug);
+		long endTime = System.nanoTime();
+
+		reportConvexHull(hullEdges);
+
+		System.out.println("Calculation of Convex Hull took " + (endTime - startTime)
+				+ " nanoseconds.");
 	}
 
 	// Function: validateArguments
@@ -142,8 +148,14 @@ public class Prog1
 		return pointList;
 	}
 
-	public static void calculateConvexHull(LinkedList<Point2D.Float> pointList,
-			boolean debug)
+	// Function: calculateConvexHull
+	// Inputs: LinkedList of Points pointList, boolean debug
+	// Returns: LinkedList of Lines
+	// calculateConvexHull implements a brute force algorithm to calculate the
+	// convex hull for a set of 2D points, and returns the edges that make up
+	// the convex hull as a linked list.
+	public static LinkedList<Line2D.Float> calculateConvexHull(
+			LinkedList<Point2D.Float> pointList, boolean debug)
 	{
 		LinkedList<Line2D.Float> hullEdges = new LinkedList<Line2D.Float>();
 		int relativePositionIndicator = 2;
@@ -153,20 +165,48 @@ public class Prog1
 			{
 				Line2D.Float inspectionLine = new Line2D.Float(pointList.get(startIndex),
 						pointList.get(endIndex));
+
+				if (debug)
+				{
+					System.out.println("Points under consideration: "
+							+ pointList.get(startIndex) + " " + pointList.get(endIndex));
+				}
+
 				boolean isHullEdge = true; // Assume isHullEdge by default
 				// Initialize to 2 because relativeCCW can't return it
 				relativePositionIndicator = 2;
+				int ptsLeftSide = 0;
+				int ptsRightSide = 0;
+
+				// Loop over every point in the linkedList, and determine
+				// whether or not all of the points relative to the inspection
+				// line are on the same side of the line.
 				for (Point2D.Float inspectionPoint : pointList)
 				{
+					// This if statement solves a deficiency in the
+					// Line2D.relativeCCW function. This will identify points
+					// that are colinear to the inspection line, even if they
+					// are outside of the range of the defining points for the
+					// line (which relativeCCW will not catch).
 					if (inspectionLine.ptSegDist(inspectionPoint) > 0
 							&& inspectionLine.ptLineDist(inspectionPoint) == 0)
 					{
 						isHullEdge = false;
-						break;
 					}
 
+					
 					int pointRelativePosition = inspectionLine
 							.relativeCCW(inspectionPoint);
+					if (pointRelativePosition == 1)
+					{
+						ptsRightSide++;
+					}
+					else if (pointRelativePosition == -1)
+					{
+						ptsLeftSide++;
+					}
+					
+					
 					if (pointRelativePosition == 0)
 					{
 						continue;
@@ -179,21 +219,52 @@ public class Prog1
 					else if (pointRelativePosition != relativePositionIndicator)
 					{
 						isHullEdge = false;
-						break;
 					}
 				}
 
-				if (isHullEdge)
+				if (debug)
+				{
+					System.out.println("Found " + ptsRightSide
+							+ " points to the right of the line, and " + ptsLeftSide
+							+ " points to the left of the line.");
+				}
+
+				if ((ptsRightSide > 0 && ptsLeftSide > 0) || isHullEdge == false)
+				{
+					if (debug)
+					{
+						System.out
+								.println("Line is not a part of the convex hull, ignoring.");
+					}
+				}
+				else
 				{
 					hullEdges.add(inspectionLine);
 					if (debug)
 					{
-						System.out.println("Add the line to convex hull:");
-						System.out.println("Start Point: " + inspectionLine.getP1());
-						System.out.println("End Point: " + inspectionLine.getP2());
+						System.out
+								.println("Adding the line as a part of the convex hull.");
 					}
 				}
 			}
+		}
+
+		return hullEdges;
+	}
+
+	// Function: reportConvexHull
+	// Inputs: LinkedList of Lines hullEdges
+	// Returns: None
+	// reportConvexHull prints the pairs of points that make up the edges of the
+	// convex hull that was computed to the console.
+	public static void reportConvexHull(LinkedList<Line2D.Float> hullEdges)
+	{
+		System.out.println("The Convex Hull is made up of the following lines:");
+
+		for (Line2D.Float edge : hullEdges)
+		{
+			System.out.println("The line between " + edge.getP1() + " and "
+					+ edge.getP2());
 		}
 	}
 }
