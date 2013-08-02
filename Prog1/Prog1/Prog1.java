@@ -5,8 +5,7 @@
 // Professor: Jim Huggins
 package Prog1;
 
-import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
+import java.awt.geom.*;
 import java.util.*;
 import java.io.*;
 
@@ -47,22 +46,19 @@ public class Prog1
 		} // We check this ahead of time, so it shouldn't be possible
 
 		// If pointList returned null, we have nothing to
-		// do, and an error message should have already
-		// been printed
+		// do, and an error message should have already been printed
 		if (pointList == null)
 		{
 			System.out.println("No data available, Exiting Application.");
 			System.exit(-1);
 		}
 
-		// Use the list of points that we created from the user's
-		// input file to calculate the convex hull for the set of points.
-
 		long startTime = System.nanoTime();
-		// Add call to convex hull function here
+		// Calculate the convex hull for the list of points in the user's file
 		LinkedList<Line2D.Float> hullEdges = calculateConvexHull(pointList, debug);
 		long endTime = System.nanoTime();
 
+		// Print the lines that make up the convex hull
 		reportConvexHull(hullEdges);
 
 		System.out.println("Calculation of Convex Hull took " + (endTime - startTime)
@@ -159,7 +155,7 @@ public class Prog1
 			LinkedList<Point2D.Float> pointList, boolean debug)
 	{
 		LinkedList<Line2D.Float> hullEdges = new LinkedList<Line2D.Float>();
-		
+
 		for (int startIndex = 0; startIndex < pointList.size(); startIndex++)
 		{
 			for (int endIndex = startIndex + 1; endIndex < pointList.size(); endIndex++)
@@ -176,7 +172,9 @@ public class Prog1
 				}
 
 				boolean isHullEdge = true; // Assume isHullEdge by default
+				// number of points to the "left" of the line
 				int ptsLeftSide = 0;
+				// number of points to the "right" of the line
 				int ptsRightSide = 0;
 
 				// Loop over every point in the linkedList, and determine
