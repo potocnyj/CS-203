@@ -159,7 +159,7 @@ public class Prog1
 			LinkedList<Point2D.Float> pointList, boolean debug)
 	{
 		LinkedList<Line2D.Float> hullEdges = new LinkedList<Line2D.Float>();
-		int relativePositionIndicator = 2;
+		
 		for (int startIndex = 0; startIndex < pointList.size(); startIndex++)
 		{
 			for (int endIndex = startIndex + 1; endIndex < pointList.size(); endIndex++)
@@ -176,8 +176,6 @@ public class Prog1
 				}
 
 				boolean isHullEdge = true; // Assume isHullEdge by default
-				// Initialize to 2 because relativeCCW can't return it
-				relativePositionIndicator = 2;
 				int ptsLeftSide = 0;
 				int ptsRightSide = 0;
 
@@ -209,20 +207,6 @@ public class Prog1
 					else if (pointRelativePosition == -1)
 					{
 						ptsLeftSide++;
-					}
-
-					if (pointRelativePosition == 0)
-					{
-						continue;
-					}
-					// If we haven't initialized it, we won't do a comparison
-					else if (relativePositionIndicator == 2)
-					{
-						relativePositionIndicator = pointRelativePosition;
-					}
-					else if (pointRelativePosition != relativePositionIndicator)
-					{
-						isHullEdge = false;
 					}
 				}
 
