@@ -142,6 +142,7 @@ public class Prog1
 		}
 		finally
 		{
+			// Always close the handle on the file
 			reader.close();
 		}
 
@@ -163,6 +164,8 @@ public class Prog1
 		{
 			for (int endIndex = startIndex + 1; endIndex < pointList.size(); endIndex++)
 			{
+				// Try and make a hull edge using every pair of points in the
+				// list
 				Line2D.Float inspectionLine = new Line2D.Float(pointList.get(startIndex),
 						pointList.get(endIndex));
 
@@ -188,13 +191,15 @@ public class Prog1
 					// that are colinear to the inspection line, even if they
 					// are outside of the range of the defining points for the
 					// line (which relativeCCW will not catch).
+					// If a point satisfies this condition, then there is a line
+					// that is better suited for use in the convex hull than the
+					// one we are currently considering.
 					if (inspectionLine.ptSegDist(inspectionPoint) > 0
 							&& inspectionLine.ptLineDist(inspectionPoint) == 0)
 					{
 						isHullEdge = false;
 					}
 
-					
 					int pointRelativePosition = inspectionLine
 							.relativeCCW(inspectionPoint);
 					if (pointRelativePosition == 1)
@@ -205,8 +210,7 @@ public class Prog1
 					{
 						ptsLeftSide++;
 					}
-					
-					
+
 					if (pointRelativePosition == 0)
 					{
 						continue;
@@ -229,6 +233,8 @@ public class Prog1
 							+ " points to the left of the line.");
 				}
 
+				// If the line only has points on one side of it, then it is a
+				// hull edge
 				if ((ptsRightSide > 0 && ptsLeftSide > 0) || isHullEdge == false)
 				{
 					if (debug)
