@@ -127,7 +127,7 @@ public class Prog2
 						Float.parseFloat(rawPoints[1]));
 
 				// Add the new point to our list
-				pointList.add(inputPoint);
+				pointList = addPointSorted(pointList, inputPoint);
 			}
 		}
 		// Getting here means we had a bad line
@@ -143,6 +143,43 @@ public class Prog2
 		{
 			// Always close the handle on the file
 			reader.close();
+		}
+
+		return pointList;
+	}
+
+	// Function: addPointSorted
+	// Inputs: LinkedList of Points pointList, Point inputPoint
+	// Returns: LinkedList of Points
+	// addPointSorted will add a new Point from the user's input
+	// file to the dataSet in sorted order
+	public static LinkedList<Point2D.Float> addPointSorted(LinkedList<Point2D.Float> pointList,
+			Point2D.Float inputPoint)
+	{
+		// we need a flag to tell us whether we inserted the item in the middle
+		// of the list or not
+		boolean added = false;
+		for (int listIndex = 0; listIndex < pointList.size(); listIndex++)
+		{
+			// Skip over the elements of the list, until we
+			// find an element that is greater than our item to insert
+			if (pointList.get(listIndex).x < inputPoint.x)
+			{
+				continue;
+			}
+			else
+			{
+				// Break when the item is inserted
+				pointList.add(listIndex, inputPoint);
+				added = true;
+				break;
+			}
+		}
+
+		// Add our input point to the end if it was never added
+		if (!added)
+		{
+			pointList.addLast(inputPoint);
 		}
 
 		return pointList;
@@ -199,8 +236,7 @@ public class Prog2
 						isHullEdge = false;
 					}
 
-					int pointRelativePosition = inspectionLine
-							.relativeCCW(inspectionPoint);
+					int pointRelativePosition = inspectionLine.relativeCCW(inspectionPoint);
 					if (pointRelativePosition == 1)
 					{
 						ptsRightSide++;
@@ -224,8 +260,7 @@ public class Prog2
 				{
 					if (debug)
 					{
-						System.out
-								.println("Line is not a part of the convex hull, ignoring.");
+						System.out.println("Line is not a part of the convex hull, ignoring.");
 					}
 				}
 				else
@@ -233,8 +268,7 @@ public class Prog2
 					hullEdges.add(inspectionLine);
 					if (debug)
 					{
-						System.out
-								.println("Adding the line as a part of the convex hull.");
+						System.out.println("Adding the line as a part of the convex hull.");
 					}
 				}
 			}
@@ -254,8 +288,7 @@ public class Prog2
 
 		for (Line2D.Float edge : hullEdges)
 		{
-			System.out.println("The line between " + edge.getP1() + " and "
-					+ edge.getP2());
+			System.out.println("The line between " + edge.getP1() + " and " + edge.getP2());
 		}
 	}
 }
