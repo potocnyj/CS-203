@@ -240,6 +240,8 @@ public class Prog2
 			extremePointLine = new Line2D.Float(rightPoint, leftPoint);
 		}
 
+		// track the position of points in the data set relative to our
+		// inspectionLine
 		int relativePosition = -2;
 		for (Point2D.Float inspectionPoint : pointList)
 		{
@@ -302,8 +304,11 @@ public class Prog2
 	public static Point2D.Float findFarthestPoint(LinkedList<Point2D.Float> pointList,
 			Line2D.Float inspectionLine)
 	{
+		// doubles to track the latest distance and farthest found distance from
+		// the inspection line for a given point in the dataSet
 		double distanceFromLine = -1;
 		double farthestDistance = -1;
+		// The point found to be farthest from the inspectionLine
 		Point2D.Float farthestPoint = null;
 
 		for (Point2D.Float inspectionPoint : pointList)
@@ -317,6 +322,7 @@ public class Prog2
 			}
 		}
 
+		// remove the point from the dataSet before we return
 		pointList.remove(farthestPoint);
 		return farthestPoint;
 	}
