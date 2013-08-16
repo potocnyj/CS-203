@@ -14,6 +14,8 @@ import java.util.Scanner;
 
 public class Prog2
 {
+	// Flag variables, represent whether calculateConvexHull should calculate
+	// the upper hull, lower hull, or both for a given call.
 	public final static int HULL_BOTH = 0;
 	public final static int HULL_UPPER = -1;
 	public final static int HULL_LOWER = 1;
@@ -242,17 +244,37 @@ public class Prog2
 			}
 		}
 
+		// The point farthest from the line
+		// between the far left and right points.
 		Point2D.Float maxPoint = null;
 		if (hullFlag == HULL_UPPER || hullFlag == HULL_BOTH)
 		{
+			// recursive calls for the upper hull
 			maxPoint = findFarthestPoint(upperPoints, extremePointLine);
+
+			// Print debug info for upper hull if user specified to do so
+			if (debug)
+			{
+				System.out.println("Upper Hull: left point " + leftPoint + ", right point "
+						+ rightPoint + ", extreme point " + maxPoint);
+			}
+
 			hullPoints.addAll(calculateConvexHull(upperPoints, leftPoint, maxPoint, -1, debug));
 			hullPoints.addAll(calculateConvexHull(upperPoints, maxPoint, rightPoint, -1, debug));
 		}
 
 		if (hullFlag == HULL_LOWER || hullFlag == HULL_BOTH)
 		{
+			// recursive calls for the lower hull
 			maxPoint = findFarthestPoint(lowerPoints, extremePointLine);
+
+			// Print debug info for lower hull if user specified to do so
+			if (debug)
+			{
+				System.out.println("Lower Hull: left point " + leftPoint + ", right point "
+						+ rightPoint + ", extreme point " + maxPoint);
+			}
+
 			hullPoints.addAll(calculateConvexHull(lowerPoints, leftPoint, maxPoint, 1, debug));
 			hullPoints.addAll(calculateConvexHull(lowerPoints, maxPoint, rightPoint, 1, debug));
 		}
@@ -293,11 +315,13 @@ public class Prog2
 	// convex hull that was computed to the console.
 	public static void reportConvexHull(LinkedList<Point2D.Float> hullPoints)
 	{
-		System.out.println("The Convex Hull is made up of the following points:");
+		System.out.println("The Convex Hull is made up of the following lines:");
 
-		for (Point2D.Float point : hullPoints)
+		// Every two points in the list should be a hull edge
+		for (int index = 0; index < hullPoints.size(); index += 2)
 		{
-			System.out.println("The point (" + point.x + ", " + point.y + ")");
+			System.out.println("The line between " + hullPoints.get(index) + " and "
+					+ hullPoints.get(index + 1));
 		}
 	}
 }
