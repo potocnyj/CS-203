@@ -1,15 +1,15 @@
 Theoretical Analysis:
-The algorithm to calculate the convex hull of a set of n points S has 
-Sum (startIndex=0, n) Sum(endIndex=startIndex+1, n) Sum(pointIndex=0, n) 1 basic operations.
+Assuming the points are sorted (they are as they are read into the linkedlist from the input file), the algorithm can run in time theta(n). 
+This is also the time required in order to find the point farthest away from the line P1P2 in the quickhull algorithm.
 
-This gives the general algorithm efficiency below:
-Algorithm Efficiency: O(n^3)
+In general, the algorithm has a worst case efficiency of theta(n^2), and an average case efficiency of theta(n). 
 
 Empirical Analysis:
-5 points  - 518781ns
-10 points - 969449ns   (x1.87 original)
-20 points - 5021262ns  (X9.68 original)
-40 points - 18087833ns (x35 original)
+5 points  - 282251ns
+10 points - 297180ns (x1.05)
+20 points - 353630ns (x1.19)
+40 points - 387687ns (x1.09)
 
-- The few trials above show that the time it takes to calculate the convex hull increases at roughly a cubic rate 
-relative to the initial test. This suggests that the algorithm does indeed have an efficiency of O(n^3)
+- The few trials above show that the time it takes to calculate the convex hull increases at roughly a linear rate, 
+which corresponds to the average time that it will take to calculate the convex hull using the quickhull algorithm.
+This suggests that the algorithm does indeed have an average efficiency of theta(n)
