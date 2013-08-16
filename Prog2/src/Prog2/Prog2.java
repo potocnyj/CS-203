@@ -14,6 +14,10 @@ import java.util.Scanner;
 
 public class Prog2
 {
+	public final static int HULL_BOTH = 0;
+	public final static int HULL_UPPER = -1;
+	public final static int HULL_LOWER = 1;
+
 	// Function: main
 	// Inputs: String array args
 	// Returns: None
@@ -56,13 +60,18 @@ public class Prog2
 			System.exit(-1);
 		}
 
+		// Get the left and right extreme points for calculating the convex hull
+		Point2D.Float leftPoint = pointList.pollFirst();
+		Point2D.Float rightPoint = pointList.pollLast();
+
 		long startTime = System.nanoTime();
 		// Calculate the convex hull for the list of points in the user's file
-		LinkedList<Line2D.Float> hullEdges = calculateConvexHull(pointList, debug);
+		LinkedList<Point2D.Float> hullPoints = calculateConvexHull(pointList, leftPoint,
+				rightPoint, HULL_BOTH, debug);
 		long endTime = System.nanoTime();
 
 		// Print the lines that make up the convex hull
-		reportConvexHull(hullEdges);
+		reportConvexHull(hullPoints);
 
 		System.out.println("Calculation of Convex Hull took " + (endTime - startTime)
 				+ " nanoseconds.");
@@ -186,95 +195,95 @@ public class Prog2
 	}
 
 	// Function: calculateConvexHull
-	// Inputs: LinkedList of Points pointList, boolean debug
+	// Inputs: LinkedList of Points pointList, Point leftPoint,
+	// Point rightPoint, boolean debug
 	// Returns: LinkedList of Lines
 	// calculateConvexHull implements a brute force algorithm to calculate the
 	// convex hull for a set of 2D points, and returns the edges that make up
 	// the convex hull as a linked list.
-	public static LinkedList<Line2D.Float> calculateConvexHull(
-			LinkedList<Point2D.Float> pointList, boolean debug)
+	public static LinkedList<Point2D.Float> calculateConvexHull(
+			LinkedList<Point2D.Float> pointList, Point2D.Float leftPoint, Point2D.Float rightPoint,
+			int hullFlag, boolean debug)
 	{
-		LinkedList<Line2D.Float> hullEdges = new LinkedList<Line2D.Float>();
+		// This list will contain all of the points for the convex hull
+		LinkedList<Point2D.Float> hullPoints = new LinkedList<Point2D.Float>();
 
-		for (int startIndex = 0; startIndex < pointList.size(); startIndex++)
+		// Return the empty list if the input list is empty
+		if (pointList.size() == 0)
 		{
-			for (int endIndex = startIndex + 1; endIndex < pointList.size(); endIndex++)
+			if (leftPoint != null) hullPoints.add(leftPoint);
+			if (rightPoint != null) hullPoints.add(rightPoint);
+
+			return hullPoints;
+		}
+
+		// These lists will contain points that are above/below the line between
+		// the extreme points
+		LinkedList<Point2D.Float> upperPoints = new LinkedList<Point2D.Float>();
+		LinkedList<Point2D.Float> lowerPoints = new LinkedList<Point2D.Float>();
+
+		// use the line between the left and right extreme points
+		// and determine which points are above/below the line
+		Line2D.Float extremePointLine = new Line2D.Float(leftPoint, rightPoint);
+		int relativePosition = -2;
+		for (Point2D.Float inspectionPoint : pointList)
+		{
+			relativePosition = extremePointLine.relativeCCW(inspectionPoint);
+			// a relativeCCW value of -1 means that the point lies above the
+			// line
+			if (relativePosition == -1)
 			{
-				// Try and make a hull edge using every pair of points in the
-				// list
-				Line2D.Float inspectionLine = new Line2D.Float(pointList.get(startIndex),
-						pointList.get(endIndex));
-
-				if (debug)
-				{
-					System.out.println("Points under consideration: "
-							+ pointList.get(startIndex) + " " + pointList.get(endIndex));
-				}
-
-				boolean isHullEdge = true; // Assume isHullEdge by default
-				// number of points to the "left" of the line
-				int ptsLeftSide = 0;
-				// number of points to the "right" of the line
-				int ptsRightSide = 0;
-
-				// Loop over every point in the linkedList, and determine
-				// whether or not all of the points relative to the inspection
-				// line are on the same side of the line.
-				for (Point2D.Float inspectionPoint : pointList)
-				{
-					// This if statement solves a deficiency in the
-					// Line2D.relativeCCW function. This will identify points
-					// that are colinear to the inspection line, even if they
-					// are outside of the range of the defining points for the
-					// line (which relativeCCW will not catch).
-					// If a point satisfies this condition, then there is a line
-					// that is better suited for use in the convex hull than the
-					// one we are currently considering.
-					if (inspectionLine.ptSegDist(inspectionPoint) > 0
-							&& inspectionLine.ptLineDist(inspectionPoint) == 0)
-					{
-						isHullEdge = false;
-					}
-
-					int pointRelativePosition = inspectionLine.relativeCCW(inspectionPoint);
-					if (pointRelativePosition == 1)
-					{
-						ptsRightSide++;
-					}
-					else if (pointRelativePosition == -1)
-					{
-						ptsLeftSide++;
-					}
-				}
-
-				if (debug)
-				{
-					System.out.println("Found " + ptsRightSide
-							+ " points to the right of the line, and " + ptsLeftSide
-							+ " points to the left of the line.");
-				}
-
-				// If the line only has points on one side of it, then it is a
-				// hull edge
-				if ((ptsRightSide > 0 && ptsLeftSide > 0) || isHullEdge == false)
-				{
-					if (debug)
-					{
-						System.out.println("Line is not a part of the convex hull, ignoring.");
-					}
-				}
-				else
-				{
-					hullEdges.add(inspectionLine);
-					if (debug)
-					{
-						System.out.println("Adding the line as a part of the convex hull.");
-					}
-				}
+				upperPoints.addLast(inspectionPoint);
+			}
+			else
+			// treat everything else as below the line
+			{
+				lowerPoints.addLast(inspectionPoint);
 			}
 		}
 
-		return hullEdges;
+		Point2D.Float maxPoint = null;
+		if (hullFlag == HULL_UPPER || hullFlag == HULL_BOTH)
+		{
+			maxPoint = findFarthestPoint(upperPoints, extremePointLine);
+			hullPoints.addAll(calculateConvexHull(upperPoints, leftPoint, maxPoint, -1, debug));
+			hullPoints.addAll(calculateConvexHull(upperPoints, maxPoint, rightPoint, -1, debug));
+		}
+
+		if (hullFlag == HULL_LOWER || hullFlag == HULL_BOTH)
+		{
+			maxPoint = findFarthestPoint(lowerPoints, extremePointLine);
+			hullPoints.addAll(calculateConvexHull(lowerPoints, leftPoint, maxPoint, 1, debug));
+			hullPoints.addAll(calculateConvexHull(lowerPoints, maxPoint, rightPoint, 1, debug));
+		}
+		return hullPoints;
+	}
+
+	// Function: findFarthestPoint
+	// Inputs: List of Points pointList, Line inspectionLine
+	// Returns: Point2D
+	// findFarthestPoint compares the input list of points to the referenceLine,
+	// and returns the point which is farthest from the line
+	public static Point2D.Float findFarthestPoint(LinkedList<Point2D.Float> pointList,
+			Line2D.Float inspectionLine)
+	{
+		double distanceFromLine = -1;
+		double farthestDistance = -1;
+		Point2D.Float farthestPoint = null;
+
+		for (Point2D.Float inspectionPoint : pointList)
+		{
+			distanceFromLine = inspectionLine.ptSegDist(inspectionPoint);
+
+			if (distanceFromLine > farthestDistance)
+			{
+				farthestDistance = distanceFromLine;
+				farthestPoint = inspectionPoint;
+			}
+		}
+
+		pointList.remove(farthestPoint);
+		return farthestPoint;
 	}
 
 	// Function: reportConvexHull
@@ -282,13 +291,13 @@ public class Prog2
 	// Returns: None
 	// reportConvexHull prints the pairs of points that make up the edges of the
 	// convex hull that was computed to the console.
-	public static void reportConvexHull(LinkedList<Line2D.Float> hullEdges)
+	public static void reportConvexHull(LinkedList<Point2D.Float> hullPoints)
 	{
-		System.out.println("The Convex Hull is made up of the following lines:");
+		System.out.println("The Convex Hull is made up of the following points:");
 
-		for (Line2D.Float edge : hullEdges)
+		for (Point2D.Float point : hullPoints)
 		{
-			System.out.println("The line between " + edge.getP1() + " and " + edge.getP2());
+			System.out.println("The point (" + point.x + ", " + point.y + ")");
 		}
 	}
 }
