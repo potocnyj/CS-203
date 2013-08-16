@@ -52,7 +52,7 @@ public class Prog2
 		}
 		catch (FileNotFoundException notFound)
 		{
-		} // We check this ahead of time, so it shouldn't be possible
+		} // We check this ahead of time, so it shouldn't be possibl
 
 		// If pointList returned null, we have nothing to
 		// do, and an error message should have already been printed
@@ -226,7 +226,20 @@ public class Prog2
 
 		// use the line between the left and right extreme points
 		// and determine which points are above/below the line
-		Line2D.Float extremePointLine = new Line2D.Float(leftPoint, rightPoint);
+		Line2D.Float extremePointLine;
+		// Mathematically, the order in which the points are passed as arguments
+		// to define the line should not matter, but for the purposes of the
+		// relativeCCW call, the point closest to the origin should be the first
+		// point passed in to the line constructor.
+		if (leftPoint.y > rightPoint.y)
+		{
+			extremePointLine = new Line2D.Float(rightPoint, leftPoint);
+		}
+		else
+		{
+			extremePointLine = new Line2D.Float(rightPoint, leftPoint);
+		}
+
 		int relativePosition = -2;
 		for (Point2D.Float inspectionPoint : pointList)
 		{
