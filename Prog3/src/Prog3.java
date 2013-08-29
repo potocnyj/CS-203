@@ -6,7 +6,6 @@
 
 import java.util.*;
 import java.util.Map.Entry;
-import java.awt.geom.Point2D;
 import java.io.*;
 
 public class Prog3
@@ -19,18 +18,14 @@ public class Prog3
 	{
 		// Get the fileName that the user specified on the command line
 		String fileName = (args.length == 1) ? args[0] : null;
-		File inputFile = null;
-		if (fileName != null)
-		{
-			inputFile = new File(fileName);
-		}
-		else
+		if (fileName == null)
 		{
 			// If no file was specified, exit
 			System.out.println("Usage: Prog3 [filePath]");
 			System.exit(-2);
 		}
 
+		File inputFile = new File(fileName);
 		// Check if the user's input file exists before using it
 		if (!inputFile.exists())
 		{
