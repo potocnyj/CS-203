@@ -5,7 +5,6 @@
 // Professor: Jim Huggins
 
 import java.util.*;
-import java.util.Map.Entry;
 import java.io.*;
 
 public class Prog3
@@ -62,11 +61,8 @@ public class Prog3
 	// the console.
 	public static void reportAnagramGroups(HashMap<String, LinkedList<String>> anagramMap)
 	{
-		// The LinkedList for every entry in our HashMap
-		LinkedList<String> anagramList = null;
-		for (Entry<String, LinkedList<String>> mapEntry : anagramMap.entrySet())
+		for (LinkedList<String> anagramList : anagramMap.values())
 		{
-			anagramList = mapEntry.getValue();
 			// We need at least 2 items in the list for a valid anagram match
 			if (anagramList.size() < 2)
 			{
@@ -121,7 +117,7 @@ public class Prog3
 				anagramList = new LinkedList<String>();
 			}
 
-			anagramList.addLast(fileLine);
+			anagramList.add(fileLine);
 			// We should only have to modify the hash map if the anagram entry
 			// didn't already exist
 			if (!anagramMap.containsKey(anagram))

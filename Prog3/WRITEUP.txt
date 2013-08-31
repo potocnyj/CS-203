@@ -1,0 +1,11 @@
+Theoretical Analysis:
+
+The theoretical worst-case running time of the implemented algorithm is O(n), where n is the number of words in the input file.
+
+- The time it takes to read in all of the words from the input file is O(n), where n is the number of words in the input file. Sorting the characters in each word will take time O(m*log(m)), where m is the number of characters for the longest word. Reporting the words that are anagrams of each other will take time O(n), where n is the number of words in the file. This means that the total running time of the algorithm will be:
+
+n + n + m*log(m)
+
+where n is the number of words in the input file, and m is the number of characters in the longest word.
+
+Because the sorting does not depend on n, the worst-case running time of the algorithm in terms of the number of words in the input file is O(2n) = O(n), where n is the number of words in the input file.
