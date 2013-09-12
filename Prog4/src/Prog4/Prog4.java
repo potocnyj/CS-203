@@ -41,6 +41,7 @@ public class Prog4
 			System.exit(-1);
 		}
 
+		optimalCost(costMatrix, costMatrix.length);
 	}
 
 	public static int[][] parseInputFile(File inputFile) throws FileNotFoundException
@@ -77,15 +78,22 @@ public class Prog4
 		return costMatrix;
 	}
 
-	public static void calculateOptimalCost(int[][] costMatrix, int numStations)
+	static int[][] optimalTripCost;
+
+	public static void optimalCost(int[][] costMatrix, int numStations)
 	{
-		int[][] optimalTripCost = costMatrix;
-		
-		for (int row = 0; row < numStations; row++)
+		optimalTripCost = costMatrix;
+		for (int startStation = 0; startStation < numStations; startStation++)
 		{
-			for(int column = 1; column < numStations; column++)
+			for (int endStation = startStation + 1; endStation < numStations; endStation++)
 			{
-				
+				if (endStation - startStation > 1)
+				{
+					optimalTripCost[startStation][endStation] = Math.min(
+							optimalTripCost[startStation][endStation],
+							optimalTripCost[startStation][startStation + 1]
+									+ optimalTripCost[startStation + 1][endStation]);
+				}
 			}
 		}
 	}
