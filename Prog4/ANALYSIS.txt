@@ -1,0 +1,5 @@
+Theoretical Analysis:
+This algorithm operates using a recursive formula in the following form: F[i, j] = min(M[i,j], F[i, i+1] + F[i+1, j]), 
+where M is the input costMatrix for canoe rentals.
+
+Using this recursive formula, this algorithm will have a worst case runtime of O(n^2), where n is the number of posts along the river.
