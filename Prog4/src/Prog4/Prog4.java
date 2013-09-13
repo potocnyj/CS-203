@@ -1,11 +1,12 @@
 package Prog4;
 
 import java.util.*;
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
 
 public class Prog4
 {
-	public static void main(String[] args) throws FileNotFoundException
+	public static void main(String[] args)
 	{
 		// Get the fileName that the user specified on the command line
 		String fileName = (args.length == 1) ? args[0] : null;
@@ -41,7 +42,8 @@ public class Prog4
 			System.exit(-1);
 		}
 
-		optimalCost(costMatrix, costMatrix.length);
+		int[][] optimalCost = optimalCost(costMatrix, costMatrix.length);
+		reportOptimalCostMatrix(optimalCost, costMatrix, optimalCost.length);
 	}
 
 	public static int[][] parseInputFile(File inputFile) throws FileNotFoundException
@@ -78,14 +80,12 @@ public class Prog4
 		return costMatrix;
 	}
 
-	static int[][] optimalTripCost;
-
-	public static void optimalCost(int[][] costMatrix, int numStations)
+	public static int[][] optimalCost(int[][] costMatrix, int numStations)
 	{
-		optimalTripCost = costMatrix;
-		for (int startStation = 0; startStation < numStations; startStation++)
+		int[][] optimalTripCost = costMatrix;
+		for (int startStation = numStations-1; startStation >= 0; startStation--)
 		{
-			for (int endStation = startStation + 1; endStation < numStations; endStation++)
+			for (int endStation = numStations-1; endStation >= startStation + 1; endStation--)
 			{
 				if (endStation - startStation > 1)
 				{
@@ -93,6 +93,53 @@ public class Prog4
 							optimalTripCost[startStation][endStation],
 							optimalTripCost[startStation][startStation + 1]
 									+ optimalTripCost[startStation + 1][endStation]);
+				}
+			}
+		}
+
+		return optimalTripCost;
+	}
+
+	public static void reportOptimalCostMatrix(int[][] optimalCost, int[][] costMatrix, int numStations)
+	{
+		System.out.println("Optimal Cost Matrix:");
+		System.out.print("\t");
+		for (int stationIndex = 0; stationIndex < numStations; stationIndex++)
+		{
+			// Print each station number as a column header
+			System.out.print(stationIndex + "\t");
+		}
+
+		// Print the cost matrix
+		System.out.println();
+		for (int startStation = 0; startStation < numStations; startStation++)
+		{
+			System.out.print(startStation + "\t");
+			for (int endStation = 0; endStation < numStations; endStation++)
+			{
+				System.out.print(((optimalCost[startStation][endStation] == 0) ? "-"
+						: optimalCost[startStation][endStation]) + "\t");
+			}
+			System.out.println();
+		}
+
+		System.out.println();
+		// Report the optimal cost to travel from the first to last station
+		System.out.println("The lowest cost to get from post 0 to post " + (numStations - 1)
+				+ " is: $" + optimalCost[0][numStations - 1]);
+		System.out.println("Rentals: ");
+		System.out.println("\tPost 0");
+		for (int row = 0; row < numStations; row++)
+		{
+			for (int col = 0; col < numStations; col++)
+			{
+				if (col - row > 1)
+				{
+					if(costMatrix[row][col] >= (costMatrix[row][row + 1] + costMatrix[row + 1][col]))
+					{
+						System.out.println("\tPost " + (col-1));
+						break;
+					}
 				}
 			}
 		}
